@@ -11,5 +11,5 @@ func main() {
 		return context.JSON(http.StatusOK, map[string]string{"System": "OK"})
 	})
 
-	echo.Logger.Fatal(api.Start(":8080"))
+	api.Logger.Fatal(api.Start(":8080"))
 }
