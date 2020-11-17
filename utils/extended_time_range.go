@@ -21,5 +21,8 @@ func ExtendTimeRange(base TimeRange) ExtendedTimeRange {
 }
 
 func (extendedTimeRange ExtendedTimeRange) IsConflict(target TimeRange) bool {
-	return target.StartTime().After(extendedTimeRange.StartTime()) && target.EndTime().Before(extendedTimeRange.EndTime())
+	onOrAfterStartTime := target.StartTime().After(extendedTimeRange.StartTime()) || target.StartTime().Equal(extendedTimeRange.StartTime())
+	onOrBeforeEndTime := target.EndTime().Before(extendedTimeRange.EndTime()) || target.EndTime().Equal(extendedTimeRange.EndTime())
+
+	return onOrAfterStartTime && onOrBeforeEndTime
 }

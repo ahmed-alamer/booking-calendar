@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"booking-calendar/schedule"
 	"booking-calendar/utils"
 	"log"
 	"testing"
@@ -8,7 +9,7 @@ import (
 )
 
 func TestCalendar_CheckAvailability(t *testing.T) {
-	operatingSchedule := utils.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
+	operatingSchedule := schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
 	providerCalendar := NewCalendar(operatingSchedule)
 
 	availability := providerCalendar.CheckAvailability(CalendarQuery{
@@ -16,28 +17,73 @@ func TestCalendar_CheckAvailability(t *testing.T) {
 		Duration: time.Hour,
 	})
 
-	for _, simpleTimeRange := range availability {
-		log.Printf("%v to %v", simpleTimeRange.StartTime(), simpleTimeRange.EndTime())
-	}
+	printAvailability(availability)
 
-	if len(availability) != 9 {
-		t.Error("Schedule should fully available for the day")
+	if len(availability) != 8 {
+		t.Error("Schedule should fully available fo entire 8 hours of the day")
 	}
 }
 
 func TestCalendar_BookAppointment(t *testing.T) {
-	operatingSchedule := utils.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
+	operatingSchedule := schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
 	providerCalendar := NewCalendar(operatingSchedule)
 
-	providerCalendar.BookAppointment(Appointment{
+	booked := providerCalendar.BookAppointment(Appointment{
 		Client:  "C1",
 		Purpose: "Test",
 		Start:   parseDateTime("2020-11-16T11:00"),
 		End:     parseDateTime("2020-11-16T12:00"),
 	})
 
+	if booked != true {
+		t.Fail()
+	}
+
 	if len(providerCalendar.appointments) != 1 {
 		t.Fail()
+	}
+
+	availability := providerCalendar.CheckAvailability(CalendarQuery{
+		Date:     parseDate("2020-11-16"),
+		Duration: time.Hour,
+	})
+
+	printAvailability(availability)
+
+	if len(availability) != 7 {
+		t.Error("This test should book only one hour, and the calendar should have 7 hours available for the day")
+	}
+}
+
+func TestCalendar_CancelAppointment(t *testing.T) {
+	operatingSchedule := schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
+	providerCalendar := NewCalendar(operatingSchedule)
+
+	booked := providerCalendar.BookAppointment(Appointment{
+		Client:  "C1",
+		Purpose: "Test",
+		Start:   parseDateTime("2020-11-16T11:00"),
+		End:     parseDateTime("2020-11-16T12:00"),
+	})
+
+	if booked != true {
+		t.Fail()
+	}
+
+	if len(providerCalendar.appointments) != 1 {
+		t.Fail()
+	}
+
+	providerCalendar.CancelAppointment(parseDateTime("2020-11-16T11:00"))
+
+	if len(providerCalendar.appointments) != 0 {
+		t.Fail()
+	}
+}
+
+func printAvailability(availability []utils.SimpleTimeRange) {
+	for _, simpleTimeRange := range availability {
+		log.Printf("%v to %v", simpleTimeRange.StartTime(), simpleTimeRange.EndTime())
 	}
 }
 

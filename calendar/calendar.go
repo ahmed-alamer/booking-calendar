@@ -23,10 +23,6 @@ type CalendarQuery struct {
 	Duration time.Duration
 }
 
-func (query CalendarQuery) Day() string {
-	return query.Date.Weekday().String()
-}
-
 func (calendar *Calendar) BookAppointment(appointment Appointment) bool {
 	for _, existingAppointment := range calendar.appointments {
 		if utils.ExtendTimeRange(existingAppointment).IsConflict(appointment) {
@@ -51,17 +47,28 @@ func (calendar *Calendar) CancelAppointment(startTime time.Time) {
 }
 
 func (calendar Calendar) CheckAvailability(query CalendarQuery) []utils.SimpleTimeRange {
-	if daySchedule, isOperatingDay := calendar.operatingSchedule[query.Day()]; isOperatingDay {
+	if daySchedule, isOperatingDay := calendar.GetDaySchedule(query.Date); isOperatingDay {
 		return calendar.compileAvailability(query, daySchedule)
 	} else {
 		return make([]utils.SimpleTimeRange, 0)
 	}
 }
 
+func (calendar Calendar) GetDaySchedule(date time.Time) (schedule.DaySchedule, bool) {
+	if daySchedule, isOperatingDay := calendar.operatingSchedule[date.Weekday().String()]; isOperatingDay {
+		startTime := utils.JustifyTime(daySchedule.StartTime(), date)
+		endTime := utils.JustifyTime(daySchedule.EndTime(), date)
+
+		return schedule.NewDaySchedule(startTime, endTime), true
+	} else {
+		return schedule.DaySchedule{}, false
+	}
+}
+
 func (calendar Calendar) compileAvailability(query CalendarQuery, daySchedule schedule.DaySchedule) []utils.SimpleTimeRange {
 	availability := make([]utils.SimpleTimeRange, 0)
 
-	timeSlotIterator := daySchedule.Iterator(query.Date, query.Duration)
+	timeSlotIterator := utils.NewTimeRangeIterator(daySchedule, query.Duration)
 	for timeSlotIterator.HasNext() {
 		timeRange := timeSlotIterator.Next()
 
