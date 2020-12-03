@@ -8,9 +8,10 @@ import (
 	"time"
 )
 
+var operatingSchedule = schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
+
 func TestCalendar_CheckAvailability(t *testing.T) {
-	operatingSchedule := schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
-	providerCalendar := NewCalendar(operatingSchedule)
+	var providerCalendar = NewCalendar(operatingSchedule)
 
 	availability := providerCalendar.CheckAvailability(CalendarQuery{
 		Date:     parseDate("2020-11-16"),
@@ -25,8 +26,7 @@ func TestCalendar_CheckAvailability(t *testing.T) {
 }
 
 func TestCalendar_BookAppointment(t *testing.T) {
-	operatingSchedule := schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
-	providerCalendar := NewCalendar(operatingSchedule)
+	var providerCalendar = NewCalendar(operatingSchedule)
 
 	booked := providerCalendar.BookAppointment(Appointment{
 		Client:  "C1",
@@ -55,9 +55,42 @@ func TestCalendar_BookAppointment(t *testing.T) {
 	}
 }
 
+func TestCalendar_BookAppointmentWithConflict(t *testing.T) {
+	var providerCalendar = NewCalendar(operatingSchedule)
+
+	booked := providerCalendar.BookAppointment(Appointment{
+		Client:  "C1",
+		Purpose: "Test",
+		Start:   parseDateTime("2020-11-16T11:00"),
+		End:     parseDateTime("2020-11-16T12:00"),
+	})
+
+	if booked != true {
+		t.Fail()
+	}
+
+	if len(providerCalendar.appointments) != 1 {
+		t.Fail()
+	}
+
+	notBooked := providerCalendar.BookAppointment(Appointment{
+		Client:  "C1",
+		Purpose: "Test",
+		Start:   parseDateTime("2020-11-16T11:00"),
+		End:     parseDateTime("2020-11-16T12:00"),
+	})
+
+	if notBooked != false {
+		t.Fail()
+	}
+
+	if len(providerCalendar.appointments) != 1 {
+		t.Fail()
+	}
+}
+
 func TestCalendar_CancelAppointment(t *testing.T) {
-	operatingSchedule := schedule.CompileBusinessWeekSchedule(parseTime("9:00AM"), parseTime("05:00PM"))
-	providerCalendar := NewCalendar(operatingSchedule)
+	var providerCalendar = NewCalendar(operatingSchedule)
 
 	booked := providerCalendar.BookAppointment(Appointment{
 		Client:  "C1",
