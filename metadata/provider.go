@@ -1,6 +1,7 @@
 package metadata
 
 type Provider struct {
-	Name string
+	Id       string
+	Name     string
 	Category string
 }

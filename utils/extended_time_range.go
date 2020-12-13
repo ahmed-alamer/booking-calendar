@@ -21,8 +21,15 @@ func ExtendTimeRange(base TimeRange) ExtendedTimeRange {
 }
 
 func (extendedTimeRange ExtendedTimeRange) IsConflict(target TimeRange) bool {
-	onOrAfterStartTime := target.StartTime().After(extendedTimeRange.StartTime()) || target.StartTime().Equal(extendedTimeRange.StartTime())
-	onOrBeforeEndTime := target.EndTime().Before(extendedTimeRange.EndTime()) || target.EndTime().Equal(extendedTimeRange.EndTime())
+	onOrAfterStartTime := target.StartTime().Equal(extendedTimeRange.StartTime()) || target.StartTime().After(extendedTimeRange.StartTime())
+	onOrBeforeEndTime := target.EndTime().Equal(extendedTimeRange.EndTime()) || target.EndTime().Before(extendedTimeRange.EndTime())
+
+	return onOrAfterStartTime && onOrBeforeEndTime
+}
+
+func (extendedTimeRange ExtendedTimeRange) IsTimeBetween(target time.Time) bool {
+	onOrAfterStartTime := target.Equal(extendedTimeRange.StartTime()) || target.After(extendedTimeRange.StartTime())
+	onOrBeforeEndTime := target.Equal(extendedTimeRange.EndTime()) || target.Before(extendedTimeRange.EndTime())
 
 	return onOrAfterStartTime && onOrBeforeEndTime
 }
