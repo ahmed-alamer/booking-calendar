@@ -23,6 +23,17 @@ type CalendarQuery struct {
 	Duration time.Duration
 }
 
+func (calendar Calendar) GetAppointments(timeRange utils.TimeRange) []Appointment {
+	result := make([]Appointment, 0)
+	for _, appointment := range calendar.appointments {
+		if utils.ExtendTimeRange(timeRange).IsTimeBetween(appointment.Start) {
+			result = append(result, appointment)
+		}
+	}
+
+	return result
+}
+
 func (calendar *Calendar) BookAppointment(appointment Appointment) bool {
 	for _, existingAppointment := range calendar.appointments {
 		if utils.ExtendTimeRange(existingAppointment).IsConflict(appointment) {
