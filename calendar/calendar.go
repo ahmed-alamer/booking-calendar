@@ -3,30 +3,27 @@ package calendar
 import (
 	"booking-calendar/schedule"
 	"booking-calendar/utils"
+	"errors"
+	"github.com/google/uuid"
 	"time"
 )
 
 type Calendar struct {
 	operatingSchedule map[string]schedule.DaySchedule
-	appointments      []Appointment
+	appointments      map[uuid.UUID]Appointment
 }
 
 func NewCalendar(operatingSchedule map[string]schedule.DaySchedule) Calendar {
 	return Calendar{
 		operatingSchedule: operatingSchedule,
-		appointments:      make([]Appointment, 0),
+		appointments:      make(map[uuid.UUID]Appointment),
 	}
-}
-
-type CalendarQuery struct {
-	Date     time.Time
-	Duration time.Duration
 }
 
 func (calendar Calendar) GetAppointments(timeRange utils.TimeRange) []Appointment {
 	result := make([]Appointment, 0)
 	for _, appointment := range calendar.appointments {
-		if utils.ExtendTimeRange(timeRange).IsTimeBetween(appointment.Start) {
+		if utils.ExtendTimeRange(timeRange).IsTimeBetween(appointment.StartTime) {
 			result = append(result, appointment)
 		}
 	}
@@ -34,30 +31,31 @@ func (calendar Calendar) GetAppointments(timeRange utils.TimeRange) []Appointmen
 	return result
 }
 
-func (calendar *Calendar) BookAppointment(appointment Appointment) bool {
+func (calendar *Calendar) BookAppointment(appointment Appointment) (uuid.UUID, error) {
 	for _, existingAppointment := range calendar.appointments {
 		if utils.ExtendTimeRange(existingAppointment).IsConflict(appointment) {
-			return false
+			return uuid.UUID{}, errors.New("conflict")
 		}
 	}
 
-	calendar.appointments = append(calendar.appointments, appointment)
-
-	return true
-}
-
-func (calendar *Calendar) CancelAppointment(startTime time.Time) {
-	appointments := make([]Appointment, 0)
-	for _, appointment := range calendar.appointments {
-		if !appointment.StartTime().Equal(startTime) {
-			appointments = append(appointments, appointment)
-		}
+	if id, uuidError := uuid.NewRandom(); uuidError == nil {
+		calendar.appointments[id] = appointment
+		return id, nil
+	} else {
+		return uuid.UUID{}, uuidError
 	}
-
-	calendar.appointments = appointments
 }
 
-func (calendar Calendar) CheckAvailability(query CalendarQuery) []utils.SimpleTimeRange {
+func (calendar *Calendar) CancelAppointment(id uuid.UUID) bool {
+	if _, exists := calendar.appointments[id]; exists {
+		delete(calendar.appointments, id) // I know this is a no-op if the key doesn't exist, returning an error is more helpful in debugging
+		return true
+	} else {
+		return false
+	}
+}
+
+func (calendar Calendar) CheckAvailability(query Query) []utils.SimpleTimeRange {
 	if daySchedule, isOperatingDay := calendar.GetDaySchedule(query.Date); isOperatingDay {
 		return calendar.compileAvailability(query, daySchedule)
 	} else {
@@ -67,8 +65,8 @@ func (calendar Calendar) CheckAvailability(query CalendarQuery) []utils.SimpleTi
 
 func (calendar Calendar) GetDaySchedule(date time.Time) (schedule.DaySchedule, bool) {
 	if daySchedule, isOperatingDay := calendar.operatingSchedule[date.Weekday().String()]; isOperatingDay {
-		startTime := utils.JustifyTime(daySchedule.StartTime(), date)
-		endTime := utils.JustifyTime(daySchedule.EndTime(), date)
+		startTime := utils.JustifyTime(daySchedule.Start(), date)
+		endTime := utils.JustifyTime(daySchedule.End(), date)
 
 		return schedule.NewDaySchedule(startTime, endTime), true
 	} else {
@@ -76,7 +74,7 @@ func (calendar Calendar) GetDaySchedule(date time.Time) (schedule.DaySchedule, b
 	}
 }
 
-func (calendar Calendar) compileAvailability(query CalendarQuery, daySchedule schedule.DaySchedule) []utils.SimpleTimeRange {
+func (calendar Calendar) compileAvailability(query Query, daySchedule schedule.DaySchedule) []utils.SimpleTimeRange {
 	availability := make([]utils.SimpleTimeRange, 0)
 
 	timeSlotIterator := utils.NewTimeRangeIterator(daySchedule, query.Duration)
@@ -84,7 +82,7 @@ func (calendar Calendar) compileAvailability(query CalendarQuery, daySchedule sc
 		timeRange := timeSlotIterator.Next()
 
 		if !calendar.isConflict(timeRange) {
-			simpleTimeRange := utils.NewSimpleTimeRange(timeRange.StartTime(), timeRange.EndTime())
+			simpleTimeRange := utils.NewSimpleTimeRange(timeRange.Start(), timeRange.End())
 			availability = append(availability, simpleTimeRange)
 		}
 	}

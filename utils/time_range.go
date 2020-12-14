@@ -3,6 +3,6 @@ package utils
 import "time"
 
 type TimeRange interface {
-	StartTime() time.Time
-	EndTime() time.Time
+	Start() time.Time
+	End() time.Time
 }

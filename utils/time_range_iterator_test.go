@@ -29,9 +29,9 @@ func TestSimpleTimeRangeIterator(t *testing.T) {
 	for iterator.HasNext() {
 		slot := iterator.Next()
 
-		fmt.Printf("%v to %v\n", slot.StartTime(), slot.EndTime())
+		fmt.Printf("%v to %v\n", slot.Start(), slot.End())
 
-		actual = append(actual, NewSimpleTimeRange(slot.StartTime(), slot.EndTime()))
+		actual = append(actual, NewSimpleTimeRange(slot.Start(), slot.End()))
 	}
 
 	expected := getExpected(startTime, endTime, delta)
@@ -40,7 +40,7 @@ func TestSimpleTimeRangeIterator(t *testing.T) {
 		t.Error("Actual is not the same size of the expected list")
 	}
 
-	for i:= 0; i < len(expected); i++ {
+	for i := 0; i < len(expected); i++ {
 		expectedSlot := expected[i]
 		actualSlot := actual[i]
 

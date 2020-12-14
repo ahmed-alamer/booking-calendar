@@ -1,7 +1,6 @@
 package rpc
 
 type Method string
-type Params string
 type ErrorCode int
 
 const (
@@ -12,12 +11,13 @@ const (
 	InternalError            = -32603
 	ProviderNotFound         = -32001
 	RequestMissingProviderId = -32002
+	AppointmentWasNotFound   = -32003
 )
 
 type Request struct {
 	Id     string `json:"id,omitempty"`
 	Method Method `json:"method"`
-	Params Params `json:"params"` // This will be parsed by the method
+	Params string `json:"params"` // This will be parsed by the method
 }
 
 type Error struct {
