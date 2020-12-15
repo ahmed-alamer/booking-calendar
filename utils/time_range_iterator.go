@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-
 type TimeRangeIterator struct {
 	pointer time.Time
 	endTime time.Time
@@ -13,8 +12,8 @@ type TimeRangeIterator struct {
 
 func NewTimeRangeIterator(timeRange TimeRange, delta time.Duration) TimeRangeIterator {
 	return TimeRangeIterator{
-		pointer: timeRange.StartTime(),
-		endTime: timeRange.EndTime(),
+		pointer: timeRange.Start(),
+		endTime: timeRange.End(),
 		delta:   delta,
 	}
 }

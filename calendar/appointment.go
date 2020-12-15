@@ -3,16 +3,16 @@ package calendar
 import "time"
 
 type Appointment struct {
-	Client  string    `json:"client"`
-	Purpose string    `json:"purpose"`
-	Start   time.Time `json:"startTime"`
-	End     time.Time `json:"endTime"`
+	Client    string    `json:"client"`
+	Purpose   string    `json:"purpose"`
+	StartTime time.Time `json:"startTime"`
+	EndTime   time.Time `json:"endTime"`
 }
 
-func (appointment Appointment) StartTime() time.Time {
-	return appointment.Start
+func (appointment Appointment) Start() time.Time {
+	return appointment.StartTime
 }
 
-func (appointment Appointment) EndTime() time.Time {
-	return appointment.End
+func (appointment Appointment) End() time.Time {
+	return appointment.EndTime
 }

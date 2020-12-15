@@ -6,12 +6,12 @@ type ExtendedTimeRange struct {
 	base TimeRange
 }
 
-func (extendedTimeRange ExtendedTimeRange) StartTime() time.Time {
-	return extendedTimeRange.base.StartTime()
+func (extendedTimeRange ExtendedTimeRange) Start() time.Time {
+	return extendedTimeRange.base.Start()
 }
 
-func (extendedTimeRange ExtendedTimeRange) EndTime() time.Time {
-	return extendedTimeRange.base.EndTime()
+func (extendedTimeRange ExtendedTimeRange) End() time.Time {
+	return extendedTimeRange.base.End()
 }
 
 func ExtendTimeRange(base TimeRange) ExtendedTimeRange {
@@ -21,15 +21,15 @@ func ExtendTimeRange(base TimeRange) ExtendedTimeRange {
 }
 
 func (extendedTimeRange ExtendedTimeRange) IsConflict(target TimeRange) bool {
-	onOrAfterStartTime := target.StartTime().Equal(extendedTimeRange.StartTime()) || target.StartTime().After(extendedTimeRange.StartTime())
-	onOrBeforeEndTime := target.EndTime().Equal(extendedTimeRange.EndTime()) || target.EndTime().Before(extendedTimeRange.EndTime())
+	onOrAfterStartTime := target.Start().Equal(extendedTimeRange.Start()) || target.Start().After(extendedTimeRange.Start())
+	onOrBeforeEndTime := target.End().Equal(extendedTimeRange.End()) || target.End().Before(extendedTimeRange.End())
 
 	return onOrAfterStartTime && onOrBeforeEndTime
 }
 
 func (extendedTimeRange ExtendedTimeRange) IsTimeBetween(target time.Time) bool {
-	onOrAfterStartTime := target.Equal(extendedTimeRange.StartTime()) || target.After(extendedTimeRange.StartTime())
-	onOrBeforeEndTime := target.Equal(extendedTimeRange.EndTime()) || target.Before(extendedTimeRange.EndTime())
+	onOrAfterStartTime := target.Equal(extendedTimeRange.Start()) || target.After(extendedTimeRange.Start())
+	onOrBeforeEndTime := target.Equal(extendedTimeRange.End()) || target.Before(extendedTimeRange.End())
 
 	return onOrAfterStartTime && onOrBeforeEndTime
 }

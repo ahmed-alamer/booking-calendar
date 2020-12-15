@@ -13,7 +13,7 @@ var operatingSchedule = schedule.CompileBusinessWeekSchedule(parseTime("9:00AM")
 func TestCalendar_CheckAvailability(t *testing.T) {
 	var providerCalendar = NewCalendar(operatingSchedule)
 
-	availability := providerCalendar.CheckAvailability(CalendarQuery{
+	availability := providerCalendar.CheckAvailability(Query{
 		Date:     parseDate("2020-11-16"),
 		Duration: time.Hour,
 	})
@@ -28,14 +28,14 @@ func TestCalendar_CheckAvailability(t *testing.T) {
 func TestCalendar_BookAppointment(t *testing.T) {
 	var providerCalendar = NewCalendar(operatingSchedule)
 
-	booked := providerCalendar.BookAppointment(Appointment{
-		Client:  "C1",
-		Purpose: "Test",
-		Start:   parseDateTime("2020-11-16T11:00"),
-		End:     parseDateTime("2020-11-16T12:00"),
+	_, err := providerCalendar.BookAppointment(Appointment{
+		Client:    "C1",
+		Purpose:   "Test",
+		StartTime: parseDateTime("2020-11-16T11:00"),
+		EndTime:   parseDateTime("2020-11-16T12:00"),
 	})
 
-	if booked != true {
+	if err != nil {
 		t.Fail()
 	}
 
@@ -43,7 +43,7 @@ func TestCalendar_BookAppointment(t *testing.T) {
 		t.Fail()
 	}
 
-	availability := providerCalendar.CheckAvailability(CalendarQuery{
+	availability := providerCalendar.CheckAvailability(Query{
 		Date:     parseDate("2020-11-16"),
 		Duration: time.Hour,
 	})
@@ -58,14 +58,14 @@ func TestCalendar_BookAppointment(t *testing.T) {
 func TestCalendar_BookAppointmentWithConflict(t *testing.T) {
 	var providerCalendar = NewCalendar(operatingSchedule)
 
-	booked := providerCalendar.BookAppointment(Appointment{
-		Client:  "C1",
-		Purpose: "Test",
-		Start:   parseDateTime("2020-11-16T11:00"),
-		End:     parseDateTime("2020-11-16T12:00"),
+	_, err1 := providerCalendar.BookAppointment(Appointment{
+		Client:    "C1",
+		Purpose:   "Test",
+		StartTime: parseDateTime("2020-11-16T11:00"),
+		EndTime:   parseDateTime("2020-11-16T12:00"),
 	})
 
-	if booked != true {
+	if err1 != nil {
 		t.Fail()
 	}
 
@@ -73,14 +73,14 @@ func TestCalendar_BookAppointmentWithConflict(t *testing.T) {
 		t.Fail()
 	}
 
-	notBooked := providerCalendar.BookAppointment(Appointment{
-		Client:  "C1",
-		Purpose: "Test",
-		Start:   parseDateTime("2020-11-16T11:00"),
-		End:     parseDateTime("2020-11-16T12:00"),
+	_, err2 := providerCalendar.BookAppointment(Appointment{
+		Client:    "C1",
+		Purpose:   "Test",
+		StartTime: parseDateTime("2020-11-16T11:00"),
+		EndTime:   parseDateTime("2020-11-16T12:00"),
 	})
 
-	if notBooked != false {
+	if err2 == nil {
 		t.Fail()
 	}
 
@@ -92,14 +92,14 @@ func TestCalendar_BookAppointmentWithConflict(t *testing.T) {
 func TestCalendar_CancelAppointment(t *testing.T) {
 	var providerCalendar = NewCalendar(operatingSchedule)
 
-	booked := providerCalendar.BookAppointment(Appointment{
-		Client:  "C1",
-		Purpose: "Test",
-		Start:   parseDateTime("2020-11-16T11:00"),
-		End:     parseDateTime("2020-11-16T12:00"),
+	id, err := providerCalendar.BookAppointment(Appointment{
+		Client:    "C1",
+		Purpose:   "Test",
+		StartTime: parseDateTime("2020-11-16T11:00"),
+		EndTime:   parseDateTime("2020-11-16T12:00"),
 	})
 
-	if booked != true {
+	if err != nil {
 		t.Fail()
 	}
 
@@ -107,7 +107,7 @@ func TestCalendar_CancelAppointment(t *testing.T) {
 		t.Fail()
 	}
 
-	providerCalendar.CancelAppointment(parseDateTime("2020-11-16T11:00"))
+	providerCalendar.CancelAppointment(id)
 
 	if len(providerCalendar.appointments) != 0 {
 		t.Fail()
@@ -116,7 +116,7 @@ func TestCalendar_CancelAppointment(t *testing.T) {
 
 func printAvailability(availability []utils.SimpleTimeRange) {
 	for _, simpleTimeRange := range availability {
-		log.Printf("%v to %v", simpleTimeRange.StartTime(), simpleTimeRange.EndTime())
+		log.Printf("%v to %v", simpleTimeRange.Start(), simpleTimeRange.End())
 	}
 }
 

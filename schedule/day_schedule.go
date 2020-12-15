@@ -10,11 +10,11 @@ type DaySchedule struct {
 	endTime   time.Time
 }
 
-func (daySchedule DaySchedule) StartTime() time.Time {
+func (daySchedule DaySchedule) Start() time.Time {
 	return daySchedule.startTime
 }
 
-func (daySchedule DaySchedule) EndTime() time.Time {
+func (daySchedule DaySchedule) End() time.Time {
 	return daySchedule.endTime
 }
 
