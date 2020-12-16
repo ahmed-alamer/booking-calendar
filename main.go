@@ -14,13 +14,13 @@ func main() {
 	calendars := make(map[string]calendar.Calendar)
 
 	api := echo.New()
-	api.GET("/", func(context echo.Context) error {
+	api.POST("/:providerId", func(context echo.Context) error {
 		request, parseError := rpc.ParseRequest(context)
 		if parseError != nil {
 			return context.JSON(http.StatusInternalServerError, rpc.ErrorResponse(request, rpc.InvalidRequest, parseError))
 		}
 
-		providerId := context.QueryParam("provider")
+		providerId := context.Param("providerId")
 		if providerId == "" {
 			return context.JSON(http.StatusInternalServerError, rpc.ErrorResponse(request, rpc.RequestMissingProviderId, errors.New("missing provider id in the request path")))
 		}
