@@ -1,5 +1,5 @@
 package rpc
 
-type Processor interface {
+type Api interface {
 	Execute(request Request) Response
 }

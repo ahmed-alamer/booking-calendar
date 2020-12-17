@@ -1,7 +1,7 @@
 package metadata
 
 type Provider struct {
-	Id       string
-	Name     string
-	Category string
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"`
 }

@@ -59,7 +59,7 @@ func checkAvailability(request rpc.Request, calendar Calendar) rpc.Response {
 
 func bookAppointment(request rpc.Request) rpc.Response {
 	appointment := &Appointment{}
-	if parseError := request.ParseParams(appointment); parseError != nil {
+	if parseError := request.ParseParams(&appointment); parseError != nil {
 		return rpc.ErrorResponse(request, rpc.InvalidParams, parseError)
 	}
 
@@ -71,7 +71,7 @@ func cancelAppointment(request rpc.Request, calendar Calendar) rpc.Response {
 		Id string `json:"id"`
 	}{}
 
-	if jsonParseError := request.ParseParams(params); jsonParseError != nil {
+	if jsonParseError := request.ParseParams(&params); jsonParseError != nil {
 		return rpc.ErrorResponse(request, rpc.ParseError, jsonParseError)
 	}
 

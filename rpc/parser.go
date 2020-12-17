@@ -8,7 +8,7 @@ import (
 
 func ParseRequest(context echo.Context) (Request, error) {
 	var request Request
-	if jsonError := context.Bind(request); jsonError == nil {
+	if jsonError := context.Bind(&request); jsonError == nil {
 		return request, nil
 	} else {
 		return request, jsonError
