@@ -14,6 +14,19 @@ const (
 	GetAppointments   rpc.Method = "getAppointments"
 )
 
+func ApiDocumentation() rpc.ApiDoc {
+	return rpc.ApiDoc{
+		Methods: []rpc.MethodDoc{
+			{Method: BookAppointment, Params: []rpc.ParamDoc{{Name: "appointment", Type: "Appointment Object"}}},
+			{Method: CancelAppointment, Params: []rpc.ParamDoc{{Name: "id", Type: "UUID", Description: "Appointment ID"}}},
+			{Method: CheckAvailability, Params: []rpc.ParamDoc{{Name: "query", Type: "query object", Description: "{ date: YYYY-MM-DD, duration: [1h, 30m, etc] }"}}},
+			{Method: GetAppointments, Description: "Get all booked appointments"},
+		},
+		Description: "Booking calendar JSON-RPC API",
+		Version:     "alpha",
+	}
+}
+
 func (calendar Calendar) Execute(request rpc.Request) rpc.Response {
 	switch request.Method {
 	case GetAppointments:
